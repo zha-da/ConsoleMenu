@@ -1,5 +1,4 @@
 ﻿using ConsoleMenu;
-using System.Collections.Generic;
 using System;
 
 namespace lab6_17
@@ -197,14 +196,14 @@ namespace lab6_17
     {
         static void Main(string[] args)
         {
-            Point point = new Point("1 nem", inc);
-            int x = 3;
-            object[] vs = { x };
-            Console.WriteLine(x);
-            point.ExecuteMethod(vs);
-            Console.WriteLine(x);
-            x = (int)vs[0];
-            Console.WriteLine(x);
+            Point point = new Point("jov", Hello);
+            Point point1 = new Point("bem", HowAreYou);
+            Point point2 = new Point("nes", ImFine);
+            ConsoleMenu.CMenu cm = new ConsoleMenu.CMenu();
+            cm.AddPoint(point);
+            cm.AddPoint(point1);
+            cm.AddPoint(point2);
+            cm.RunMenu();
             Console.ReadKey();
         }
         static void inc(object[] args)
