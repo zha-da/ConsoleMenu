@@ -6,14 +6,15 @@ namespace ConsoleMenu
     public class CMenu
     {
         List<Point> points { get; set; }
-        public CMenu(List<Point> vs)
-        {
-            points = vs;
-        }
+        public CMenu(List<Point> vs) => points = vs;
         public CMenu() => points = new List<Point>();
-        public void AddPoint(Point point)
+        public void AddPoint(Point point) => points.Add(point);
+        public void AddPoint(List<Point> points)
         {
-            points.Add(point);
+            foreach (Point point in points)
+            {
+                this.points.Add(point);
+            }
         }
         public void RunMenu()
         {
@@ -33,6 +34,10 @@ namespace ConsoleMenu
                     if (int.TryParse(choice, out num) && num <= points.Count)
                     {
                         points[num - 1].ExecuteMethod();
+                        if(points[num - 1].ReturnsObject)
+                        {
+                            Console.WriteLine(points[num - 1].ReturnedValue);
+                        }
                     }
                     else if (num > points.Count)
                     {

@@ -1,5 +1,6 @@
 ﻿using ConsoleMenu;
 using System;
+using System.Collections.Generic;
 
 namespace lab6_17
 {
@@ -199,12 +200,10 @@ namespace lab6_17
             Point point = new Point("jov", Hello);
             Point point1 = new Point("bem", HowAreYou);
             Point point2 = new Point("nes", ImFine);
-            ConsoleMenu.CMenu cm = new ConsoleMenu.CMenu();
-            cm.AddPoint(point);
-            cm.AddPoint(point1);
-            cm.AddPoint(point2);
+            Point point3 = new Point("bip", Line);
+            CMenu cm = new CMenu();
+            cm.AddPoint(new List<Point> { point, point1, point2, point3 });
             cm.RunMenu();
-            Console.ReadKey();
         }
         static void inc(object[] args)
         {

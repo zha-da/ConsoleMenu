@@ -3,3 +3,4 @@
 *.suo
 [Bb]in/
 [Oo]bj/
+*.user
