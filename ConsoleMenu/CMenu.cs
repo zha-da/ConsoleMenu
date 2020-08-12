@@ -22,7 +22,7 @@ namespace ConsoleMenu
             {
                 if (points.Count == 0) throw new Exception("Ошибка: в меню нет пунктов");
                 string choice = "0";
-                while (!choice.ToLower().Equals("exit"))
+                while (!choice.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0].ToLower().Equals("exit"))
                 {
                     Console.Clear();
                     for (int i = 0; i < points.Count; i++)
@@ -36,7 +36,7 @@ namespace ConsoleMenu
                         points[num - 1].ExecuteMethod();
                         if(points[num - 1].ReturnsObject)
                         {
-                            Console.WriteLine(points[num - 1].ReturnedValue);
+                            Console.WriteLine(points[num - 1].ReturnedValue.result.ToString());
                         }
                     }
                     else if (num > points.Count)
