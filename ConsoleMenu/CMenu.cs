@@ -3,12 +3,30 @@ using System.Collections.Generic;
 
 namespace ConsoleMenu
 {
+    /// <summary>
+    /// Класс консольного меню
+    /// </summary>
     public class CMenu
     {
         List<Point> points { get; set; }
-        public CMenu(List<Point> vs) => points = vs;
+        /// <summary>
+        /// Создает экземпляр консольного меню из списка пунктов меню
+        /// </summary>
+        /// <param name="points">Список пунктов меню</param>
+        public CMenu(List<Point> points) => this.points = points;
+        /// <summary>
+        /// Создает пустое консольное меню без пунктов
+        /// </summary>
         public CMenu() => points = new List<Point>();
+        /// <summary>
+        /// Добавляет один пункт в меню
+        /// </summary>
+        /// <param name="point">Пункт</param>
         public void AddPoint(Point point) => points.Add(point);
+        /// <summary>
+        /// Добавляет список пунктов в меню
+        /// </summary>
+        /// <param name="points">Список пунктов</param>
         public void AddPoint(List<Point> points)
         {
             foreach (Point point in points)
@@ -16,6 +34,10 @@ namespace ConsoleMenu
                 this.points.Add(point);
             }
         }
+        /// <summary>
+        /// <para>Запускает меню</para>
+        /// <para><b>Для завершения работы меню напишите в консоли слово "exit"</b></para>
+        /// </summary>
         public void RunMenu()
         {
             try
