@@ -38,7 +38,7 @@ namespace ConsoleMenu
         /// <para>Запускает меню</para>
         /// <para><b>Для завершения работы меню напишите в консоли слово "exit"</b></para>
         /// </summary>
-        public void RunMenu()
+        public void RunMenuNumbers()
         {
             try
             {
@@ -67,6 +67,76 @@ namespace ConsoleMenu
                     }
                     Console.ReadKey();
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        /// <summary>
+        /// <para>Запускает меню, контролиремое кнопками на клавиатуре</para>
+        /// <para><b>Для завершения работы меню нажмите клавишу "Escape"</b></para>
+        /// </summary>
+        public void RunMenuButtons()
+        {
+            try
+            {
+                if (points.Count == 0) throw new Exception("Ошибка: в меню нет пунктов");
+
+                Console.CursorVisible = false;
+                Console.WriteLine("Выберите один из следующих пунктов меню с помощью клавиш " +
+                    "<Стрелка вверх> и <Стрелка вниз> " +
+                    "и нажмите клавишу <Enter> для перехода к пункту");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"1 {points[0].Name}");
+                Console.ForegroundColor = ConsoleColor.White;
+
+                for (int i = 1; i < points.Count; i++)
+                {
+                    Console.WriteLine($"{i + 1} {points[i].Name}");
+                }
+                int Cursor = 0;
+                ConsoleKey ck = 0;
+
+                while(ck != ConsoleKey.Escape)
+                {
+                    ck = Console.ReadKey(true).Key;
+                    if (ck == ConsoleKey.DownArrow && Cursor < points.Count - 1)
+                    {
+                        Cursor++;
+                    }
+                    if (ck == ConsoleKey.UpArrow && Cursor > 0)
+                    {
+                        Cursor--;
+                    }
+                    if (ck == ConsoleKey.Enter)
+                    {
+                        points[Cursor].ExecuteMethod();
+                        if (points[Cursor].ReturnsObject)
+                        {
+                            Console.WriteLine(points[Cursor].ReturnedValue.result.ToString());
+                        }
+                        Console.ReadKey();
+                    }
+                    Console.Clear();
+                    Console.WriteLine("Выберите один из следующих пунктов меню с помощью клавиш " +
+                        "<Стрелка вверх> и <Стрелка вниз> " +
+                        "и нажмите клавишу <Enter> для перехода к пункту");
+                    for (int i = 0; i < points.Count; i++)
+                    {
+                        if (i == Cursor)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"{i + 1} {points[i].Name}");
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"{i + 1} {points[i].Name}");
+                        }
+                    }
+                }
+
             }
             catch (Exception ex)
             {
