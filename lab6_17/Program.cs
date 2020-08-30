@@ -1,6 +1,8 @@
 ﻿using ConsoleMenu;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace lab6_17
@@ -9,47 +11,170 @@ namespace lab6_17
     {
         static void Main(string[] args)
         {
-            #region unimportant info
-            //string m1 = "hello there";
-            //int i1 = 4;
-            //Point task = new Point("first p" ,() => WriteMes(m1, i1));
-            //PointExecutionResult returnHere = new PointExecutionResult();
-            //Point p2 = new Point("name", Line, returnHere);
-            //Point task2 = new Point("sec p", () => WriteMes(m1, i1));
-            ////task.ExecuteMethod();
-            //m1 = "hello world";
-            //i1 = 12;
-            ////task.ExecuteMethod();
-            //PointExecutionResult per = new PointExecutionResult();
-            //Point pp = new Point("sus", () => Line("sus"), per);
-            //pp.ExecuteMethod();
-            ////Console.WriteLine(per.result.ToString());
+            #region Matrix
+            PointExecutionResult Matrix = new PointExecutionResult();
+            Point inkb = new Point("Ввод матрицы с клавиатуры", GetMatrixFromKeyboard, Matrix);
+            Point inf = new Point("Ввод матрицы из файла", GetMatrixFromFile, Matrix);
+            Point chrct = new Point("Вычисление характеристики", () => Characteristic((int[,])Matrix.result));
+            Point chgmt = new Point("Преобразование матрицы", () => ChangeMatrix(Matrix));
+            Point wrt = new Point("Печать матрицы", () => WriteMatrix((int[,])Matrix.result));
+            CMenu menu = new CMenu(new List<Point> { inkb, inf, chrct, chgmt, wrt });
+            menu.RunMenu(MenuModes.Numbers);
             #endregion
+        }
+        static int[,] GetMatrixFromKeyboard()
+        {
+            Console.Write("Введите размерность матрицы: ");
+            Console.CursorVisible = true;
+            string[] Size = Console.ReadLine().Split(' ');
+            Console.WriteLine();
+            int n = int.Parse(Size[0]);
+            int m = int.Parse(Size[1]);
+            Console.WriteLine($"Введите матрицу размера {n} на {m}: ");
+            string[] NewRow;
+            int[,] Matrix = new int[n, m];
+            for (int i = 0; i < n; i++)
+            {
+                NewRow = Console.ReadLine().Split(' ');
+                for (int j = 0; j < m; j++)
+                {
+                    Matrix[i, j] = int.Parse(NewRow[j]);
+                }
+            }
+            Console.CursorVisible = false;
+            Console.WriteLine("Матрица введена");
+            Console.WriteLine("Нажмите любую кнопку для продолжения");
+            Console.ReadKey();
+            return Matrix;
+        }
+        static int[,] GetMatrixFromFile()
+        {
+            string FileName = "input1.txt";
+            int[,] Matrix;
+            int Rows = 0;
+            int Columns = 0;
+            StringBuilder Array = new StringBuilder();
+            using (StreamReader sr = new StreamReader(FileName))
+            {
+                string NewLine;
+                while ((NewLine = sr.ReadLine()) != null)
+                {
+                    Array.Append(NewLine);
+                    Array.Append(" ");
+                    string[] Col = NewLine.Split(' ');
+                    Columns = Col.Length;
+                    Rows++;
+                }
+                Matrix = new int[Rows, Columns];
+                string[] AllNums = Array.ToString().Split(' ');
+                for (int i = 0; i < Rows; i++)
+                {
+                    for (int j = 0; j < Columns; j++)
+                    {
+                        Matrix[i, j] = int.Parse(AllNums[i * Columns + j]);
+                    }
+                }
+                sr.Close();
+            }
+            Console.WriteLine("Матрица загружена");
+            Console.WriteLine("Нажмите любую кнопку для продолжения");
+            Console.ReadKey();
+            return Matrix;
+        }
+        static void Characteristic(int[,] Matrix)
+        {
+            try
+            {
+                if (Matrix == null) throw new Exception("Матрица не инициализорована");
+                int[] MaxElements = new int[Matrix.GetLength(0)];
+                for (int i = 0; i < MaxElements.Length; i++)
+                {
+                    MaxElements[i] = -100000;
+                }
+                for (int i = 0; i < Matrix.GetLength(0); i++)
+                {
+                    for (int j = 0; j < Matrix.GetLength(1); j++)
+                    {
+                        if (MaxElements[i] < Matrix[i, j])
+                        {
+                            MaxElements[i] = Matrix[i, j];
+                        }
+                    }
+                }
+                bool IsGood = true;
+                for (int i = 0; i < MaxElements.Length - 1; i++)
+                {
+                    if (MaxElements[i] <= MaxElements[i + 1])
+                    {
+                        IsGood = false;
+                        break;
+                    }
+                }
+                if (IsGood) Console.WriteLine("Матрица подходит под характеристику");
+                else Console.WriteLine("Матрица не подходит под характеристику");
+                Console.WriteLine("Нажмите любую кнопку для продолжения");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("Нажмите любую кнопку для продолжения");
+                Console.ReadKey();
+            }
 
-
-            Point point = new Point("jov", Hello);
-            Point point1 = new Point("bem", HowAreYou);
-            Point point2 = new Point("nes", ImFine);
-            PointExecutionResult returnTo = new PointExecutionResult();
-            Point point3 = new Point("bip", Line, returnTo);
-            CMenu cm = new CMenu();
-            cm.AddPoint(new List<Point> { point, point1, point2, point3 });
-            cm.RunMenuButtons();
         }
-        static void WriteMes(string message, int t) => Console.WriteLine(message + " " + t);
-        static string Line() => "Line";
-        static string Line(string line) => line + ".";
-        static void Hello()
+        static void ChangeMatrix(PointExecutionResult mat)
         {
-            Console.WriteLine("Hello");
+            try
+            {
+                int[,] Matrix = (int[,])mat.result;
+                if (Matrix == null) throw new Exception("Матрица не инициализирована");
+                int Rows = Matrix.GetLength(0);
+                int Columns = Matrix.GetLength(1);
+                for (int i = 0; i < Rows; i++)
+                {
+                    for (int j = 0; j < Columns / 2; j++)
+                    {
+                        int temp = Matrix[i, j];
+                        Matrix[i, j] = Matrix[i, Columns - j - 1];
+                        Matrix[i, Columns - j - 1] = temp;
+                    }
+                }
+                mat.result = Matrix;
+                Console.WriteLine("Матрица изменена");
+                Console.WriteLine("Нажмите любую кнопку для продолжения");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("Нажмите любую кнопку для продолжения");
+                Console.ReadKey();
+            }
         }
-        static void HowAreYou()
+        static void WriteMatrix(int[,] Matrix)
         {
-            Console.WriteLine("How are you?");
-        }
-        static void ImFine()
-        {
-            Console.WriteLine("I am fine");
+            try
+            {
+                if (Matrix == null) throw new Exception("Маьрица не инициализирована");
+                for (int i = 0; i < Matrix.GetLength(0); i++)
+                {
+                    for (int j = 0; j < Matrix.GetLength(1); j++)
+                    {
+                        Console.Write($"{Matrix[i, j],3}");
+                    }
+                    Console.WriteLine();
+                }
+                Console.WriteLine("Матрица выведена");
+                Console.WriteLine("Нажмите любую кнопку для продолжения");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("Нажмите любую кнопку для продолжения");
+                Console.ReadKey();
+            }
         }
     }
 }
