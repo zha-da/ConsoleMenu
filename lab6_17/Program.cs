@@ -19,7 +19,7 @@ namespace lab6_17
             Point chgmt = new Point("Преобразование матрицы", () => ChangeMatrix(Matrix));
             Point wrt = new Point("Печать матрицы", () => WriteMatrix((int[,])Matrix.result));
             CMenu menu = new CMenu(new List<Point> { inkb, inf, chrct, chgmt, wrt });
-            menu.RunMenu(MenuModes.Numbers);
+            menu.RunMenu(MenuModes.Buttons);
             #endregion
         }
         static int[,] GetMatrixFromKeyboard()
