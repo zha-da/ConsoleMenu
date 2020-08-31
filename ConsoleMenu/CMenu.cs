@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ConsoleMenu
 {
@@ -36,38 +38,42 @@ namespace ConsoleMenu
         /// Клавиша для завершения работы меню в режиме  Buttons (по умолчанию Escape)
         /// </summary>
         public ConsoleKey StopButton { get; set; } = ConsoleKey.Escape;
-        List<Point> points { get; set; }
+        List<MenuPoint> points { get; set; }
         /// <summary>
         /// Создает экземпляр консольного меню из списка пунктов меню
         /// </summary>
         /// <param name="points">Список пунктов меню</param>
-        public CMenu(List<Point> points) => this.points = points;
+        public CMenu(List<MenuPoint> points) => this.points = points;
         /// <summary>
         /// Создает пустое консольное меню без пунктов
         /// </summary>
-        public CMenu() => points = new List<Point>();
+        public CMenu() => points = new List<MenuPoint>();
         /// <summary>
         /// Добавляет один пункт в меню
         /// </summary>
         /// <param name="point">Пункт</param>
-        public void AddPoint(Point point) => points.Add(point);
+        public void AddPoint(MenuPoint point) => points.Add(point);
         /// <summary>
         /// Добавляет список пунктов в меню
         /// </summary>
         /// <param name="points">Список пунктов</param>
-        public void AddPoint(List<Point> points)
+        public void AddPoint(List<MenuPoint> points)
         {
-            foreach (Point point in points)
+            foreach (MenuPoint point in points)
             {
                 this.points.Add(point);
             }
         }
+        CancellationTokenSource cts = new CancellationTokenSource();
+        CancellationToken cancellationToken;
         /// <summary>
         /// Запускает меню в режиме по умолчанию (управление стрелками на клавиатуре)
         /// </summary>
         public void RunMenu()
         {
-            RunMenuButtons();
+            cancellationToken = cts.Token;
+            Task run = Task.Factory.StartNew(() => RunMenuButtons());
+            run.Wait();
         }
         /// <summary>
         /// Запускает меню в выбранном режиме
@@ -75,35 +81,40 @@ namespace ConsoleMenu
         /// <param name="mode">Желаемый режим запуска меню</param>
         public void RunMenu(MenuModes mode)
         {
-            if (mode == MenuModes.Buttons) RunMenuButtons();
-            else RunMenuNumbers();
+            if (mode == MenuModes.Buttons)
+            {
+                cancellationToken = cts.Token;
+                Task run = Task.Factory.StartNew(() => RunMenuButtons());
+                run.Wait();
+            }
+            else
+            {
+                cancellationToken = cts.Token;
+                Task run = Task.Factory.StartNew(() => RunMenuNumbers());
+                run.Wait();
+            }
         }
-        /// <summary>
-        /// <para>Запускает меню</para>
-        /// <para><b>Для завершения работы меню напишите в консоли слово "exit"</b></para>
-        /// </summary>
         private void RunMenuNumbers()
         {
             try
             {
                 if (points.Count == 0) throw new Exception("Ошибка: в меню нет пунктов");
+
                 string choice = "0";
-                while (!choice.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0].ToLower().Equals(StopWord.ToLower()))
+                while (!cancellationToken.IsCancellationRequested && 
+                    !choice.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0].ToLower().Equals(StopWord.ToLower()))
                 {
+                    if (cancellationToken.IsCancellationRequested) throw new Exception("Завершение работы меню");
                     Console.Clear();
                     for (int i = 0; i < points.Count; i++)
                     {
                         Console.WriteLine($"{i + 1} {points[i].Name}");
                     }
                     choice = Console.ReadLine();
-                    int num;
-                    if (int.TryParse(choice, out num) && num <= points.Count)
+                    if (int.TryParse(choice, out int num) && num <= points.Count)
                     {
-                        points[num - 1].ExecuteMethod();
-                        //if(points[num - 1].ReturnsObject)
-                        //{
-                        //    Console.WriteLine(points[num - 1].ReturnedValue.result.ToString());
-                        //}
+                        if (points[num - 1].IsExitPoint) cts.Cancel();
+                        else points[num - 1].ExecuteMethod();
                     }
                     else if (num > points.Count)
                     {
@@ -115,12 +126,9 @@ namespace ConsoleMenu
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.ReadKey();
             }
         }
-        /// <summary>
-        /// <para>Запускает меню, контролиремое кнопками на клавиатуре</para>
-        /// <para><b>Для завершения работы меню нажмите клавишу "Escape"</b></para>
-        /// </summary>
         private void RunMenuButtons()
         {
             try
@@ -128,6 +136,7 @@ namespace ConsoleMenu
                 if (points.Count == 0) throw new Exception("Ошибка: в меню нет пунктов");
 
                 Console.CursorVisible = false;
+                Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("Выберите один из следующих пунктов меню с помощью клавиш " +
                     "<Стрелка вверх> и <Стрелка вниз> " +
                     "и нажмите клавишу <Enter> для перехода к пункту");
@@ -142,8 +151,10 @@ namespace ConsoleMenu
                 int Cursor = 0;
                 ConsoleKey ck = 0;
 
-                while(ck != StopButton)
+                while(!cancellationToken.IsCancellationRequested && 
+                    ck != StopButton)
                 {
+                    if (cancellationToken.IsCancellationRequested) throw new Exception("Завершение работы меню");
                     ck = Console.ReadKey(true).Key;
                     if (ck == ConsoleKey.DownArrow && Cursor < points.Count - 1)
                     {
@@ -155,12 +166,8 @@ namespace ConsoleMenu
                     }
                     else if (ck == ConsoleKey.Enter)
                     {
-                        points[Cursor].ExecuteMethod();
-                        //if (points[Cursor].ReturnsObject)
-                        //{
-                        //    Console.WriteLine(points[Cursor].ReturnedValue.result.ToString());
-                        //}
-                        //Console.ReadKey();
+                        if (points[Cursor].IsExitPoint) cts.Cancel();
+                        else points[Cursor].ExecuteMethod();
                     }
                     else
                     {
@@ -189,6 +196,7 @@ namespace ConsoleMenu
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.ReadKey();
             }
         }
     }

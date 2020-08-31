@@ -13,13 +13,14 @@ namespace lab6_17
         {
             #region Matrix
             PointExecutionResult Matrix = new PointExecutionResult();
-            Point inkb = new Point("Ввод матрицы с клавиатуры", GetMatrixFromKeyboard, Matrix);
-            Point inf = new Point("Ввод матрицы из файла", GetMatrixFromFile, Matrix);
-            Point chrct = new Point("Вычисление характеристики", () => Characteristic((int[,])Matrix.result));
-            Point chgmt = new Point("Преобразование матрицы", () => ChangeMatrix(Matrix));
-            Point wrt = new Point("Печать матрицы", () => WriteMatrix((int[,])Matrix.result));
-            CMenu menu = new CMenu(new List<Point> { inkb, inf, chrct, chgmt, wrt });
-            menu.RunMenu(MenuModes.Buttons);
+            MenuPoint inkb = new MenuPoint("Ввод матрицы с клавиатуры", GetMatrixFromKeyboard, Matrix);
+            MenuPoint inf = new MenuPoint("Ввод матрицы из файла", GetMatrixFromFile, Matrix);
+            MenuPoint chrct = new MenuPoint("Вычисление характеристики", () => Characteristic((int[,])Matrix.result));
+            MenuPoint chgmt = new MenuPoint("Преобразование матрицы", () => ChangeMatrix(Matrix));
+            MenuPoint wrt = new MenuPoint("Печать матрицы", () => WriteMatrix((int[,])Matrix.result));
+            MenuPoint exit = new MenuPoint("Выход");
+            CMenu menu = new CMenu(new List<MenuPoint> { inkb, inf, chrct, chgmt, wrt, exit });
+            menu.RunMenu(MenuModes.Numbers);
             #endregion
         }
         static int[,] GetMatrixFromKeyboard()

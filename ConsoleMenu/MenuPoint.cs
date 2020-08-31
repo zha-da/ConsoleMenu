@@ -5,10 +5,14 @@ namespace ConsoleMenu
     /// <summary>
     /// Класс пункта меню
     /// </summary>
-    public class Point
+    public class MenuPoint
     {
         Action method { get; set; }
         Func<object> r_method { get; set; }
+        /// <summary>
+        /// Указывает, отвечает ли пункт за завершение работы меню
+        /// </summary>
+        public bool IsExitPoint { get; set; } = false;
         /// <summary>
         /// Данное имя будет отображаться при запуске консольного меню
         /// </summary>
@@ -40,7 +44,7 @@ namespace ConsoleMenu
         /// </code>
         /// </example>
         /// </param>
-        public Point(string name, Action method)
+        public MenuPoint(string name, Action method)
         {
             Name = name;
             this.method = method;
@@ -66,12 +70,21 @@ namespace ConsoleMenu
         /// </example>
         /// </param>
         /// <param name="result">Результат выполнения пункта меню хранится здесь</param>
-        public Point(string name, Func<object> r_method, PointExecutionResult result)
+        public MenuPoint(string name, Func<object> r_method, PointExecutionResult result)
         {
             Name = name;
             this.r_method = r_method;
             ReturnedValue = result;
             ReturnsObject = true;
+        }
+        /// <summary>
+        /// Создает пункт меню, отвечающий за завершение работы меню
+        /// </summary>
+        /// <param name="name">Имя пункта. Рекомендуется выбирать имя обозначающее выход из меню (например, "Выход")</param>
+        public MenuPoint(string name)
+        {
+            Name = name;
+            IsExitPoint = true;
         }
         /// <summary>
         /// Запускает выполнение пункта меню
