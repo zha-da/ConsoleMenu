@@ -20,7 +20,9 @@ namespace lab6_17
             MenuPoint wrt = new MenuPoint("Печать матрицы", () => WriteMatrix((int[,])Matrix.result));
             MenuPoint exit = new MenuPoint("Выход");
             CMenu menu = new CMenu(new List<MenuPoint> { inkb, inf, chrct, chgmt, wrt, exit });
-            menu.RunMenu(MenuModes.Numbers);
+            MenuSettings set = new MenuSettings() { HighlightColor = ConsoleColor.Yellow, RestingColor = ConsoleColor.Red };
+            menu.AddUserSettings(set);
+            menu.RunMenu();
             #endregion
         }
         static int[,] GetMatrixFromKeyboard()

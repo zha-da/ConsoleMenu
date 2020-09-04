@@ -31,13 +31,9 @@ namespace ConsoleMenu
     public class CMenu
     {
         /// <summary>
-        /// Стоп-слово для завершения работы меню в режиме Numbers (по умолчанию exit). Регистры не учитываются.
+        /// Текущие настройки работы меню
         /// </summary>
-        public string StopWord { get; set; } = "exit";
-        /// <summary>
-        /// Клавиша для завершения работы меню в режиме  Buttons (по умолчанию Escape)
-        /// </summary>
-        public ConsoleKey StopButton { get; set; } = ConsoleKey.Escape;
+        public MenuSettings CurrentSettings { get; set; } = new MenuSettings();
         List<MenuPoint> points { get; set; }
         /// <summary>
         /// Создает экземпляр консольного меню из списка пунктов меню
@@ -67,13 +63,30 @@ namespace ConsoleMenu
         CancellationTokenSource cts = new CancellationTokenSource();
         CancellationToken cancellationToken;
         /// <summary>
+        /// Добавляет пользовательские настройки меню
+        /// </summary>
+        /// <param name="userSettings">Пользовательские настройки</param>
+        public void AddUserSettings(MenuSettings userSettings)
+        {
+            CurrentSettings = userSettings;
+        }
+        /// <summary>
         /// Запускает меню в режиме по умолчанию (управление стрелками на клавиатуре)
         /// </summary>
         public void RunMenu()
         {
-            cancellationToken = cts.Token;
-            Task run = Task.Factory.StartNew(() => RunMenuButtons());
-            run.Wait();
+            if (CurrentSettings.CurrentMode == MenuModes.Buttons)
+            {
+                cancellationToken = cts.Token;
+                Task run = Task.Factory.StartNew(() => RunMenuButtons());
+                run.Wait();
+            }
+            else
+            {
+                cancellationToken = cts.Token;
+                Task run = Task.Factory.StartNew(() => RunMenuNumbers());
+                run.Wait();
+            }
         }
         /// <summary>
         /// Запускает меню в выбранном режиме
@@ -98,13 +111,13 @@ namespace ConsoleMenu
         {
             try
             {
-                if (points.Count == 0) throw new Exception("Ошибка: в меню нет пунктов");
+                if (points.Count == 0) throw new Exception(CurrentSettings.ErrorPhrase + "в меню нет пунктов");
 
                 string choice = "0";
                 while (!cancellationToken.IsCancellationRequested && 
-                    !choice.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0].ToLower().Equals(StopWord.ToLower()))
+                    !choice.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0].ToLower().Equals(CurrentSettings.ExitWord.ToLower()))
                 {
-                    if (cancellationToken.IsCancellationRequested) throw new Exception("Завершение работы меню");
+                    if (cancellationToken.IsCancellationRequested) throw new Exception(CurrentSettings.ClosingPhrase);
                     Console.Clear();
                     for (int i = 0; i < points.Count; i++)
                     {
@@ -118,7 +131,7 @@ namespace ConsoleMenu
                     }
                     else if (num > points.Count)
                     {
-                        Console.WriteLine($"Пункта с подобным номером не существует. Введите число от 1 до {points.Count}");
+                        Console.WriteLine($"{CurrentSettings.ErrorPhrase} пункта с подобным номером не существует. Введите число от 1 до {points.Count}");
                         Console.ReadKey();
                     }
                 }
@@ -133,16 +146,16 @@ namespace ConsoleMenu
         {
             try
             {
-                if (points.Count == 0) throw new Exception("Ошибка: в меню нет пунктов");
+                if (points.Count == 0) throw new Exception(CurrentSettings.ErrorPhrase + "в меню нет пунктов");
 
                 Console.CursorVisible = false;
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("Выберите один из следующих пунктов меню с помощью клавиш " +
+                Console.ForegroundColor = CurrentSettings.RestingColor;
+                Console.WriteLine(CurrentSettings.OpeningPhrase + " с помощью клавиш " +
                     "<Стрелка вверх> и <Стрелка вниз> " +
                     "и нажмите клавишу <Enter> для перехода к пункту");
-                Console.ForegroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = CurrentSettings.HighlightColor;
                 Console.WriteLine($"1 {points[0].Name}");
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = CurrentSettings.RestingColor;
 
                 for (int i = 1; i < points.Count; i++)
                 {
@@ -152,9 +165,9 @@ namespace ConsoleMenu
                 ConsoleKey ck = 0;
 
                 while(!cancellationToken.IsCancellationRequested && 
-                    ck != StopButton)
+                    ck != CurrentSettings.ExitKey)
                 {
-                    if (cancellationToken.IsCancellationRequested) throw new Exception("Завершение работы меню");
+                    if (cancellationToken.IsCancellationRequested) throw new Exception(CurrentSettings.ClosingPhrase);
                     ck = Console.ReadKey(true).Key;
                     if (ck == ConsoleKey.DownArrow && Cursor < points.Count - 1)
                     {
@@ -174,16 +187,16 @@ namespace ConsoleMenu
                         continue;
                     }
                     Console.Clear();
-                    Console.WriteLine("Выберите один из следующих пунктов меню с помощью клавиш " +
+                    Console.WriteLine(CurrentSettings.OpeningPhrase + " с помощью клавиш " +
                         "<Стрелка вверх> и <Стрелка вниз> " +
                         "и нажмите клавишу <Enter> для перехода к пункту");
                     for (int i = 0; i < points.Count; i++)
                     {
                         if (i == Cursor)
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.ForegroundColor = CurrentSettings.HighlightColor;
                             Console.WriteLine($"{i + 1} {points[i].Name}");
-                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.ForegroundColor = CurrentSettings.RestingColor;
                         }
                         else
                         {
