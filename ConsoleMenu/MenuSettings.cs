@@ -19,10 +19,6 @@ namespace ConsoleMenu
         /// </summary>
         public string ClosingPhrase { get; set; } = "Завершение работы меню";
         /// <summary>
-        /// Фраза для обозначения ошибок
-        /// </summary>
-        public string ErrorPhrase { get; set; } = "Ошибка: ";
-        /// <summary>
         /// Клавиша для завершения работы меню
         /// </summary>
         public ConsoleKey ExitKey { get; set; } = ConsoleKey.Escape;

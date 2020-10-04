@@ -111,13 +111,13 @@ namespace ConsoleMenu
         {
             try
             {
-                if (points.Count == 0) throw new Exception(CurrentSettings.ErrorPhrase + "в меню нет пунктов");
+                if (points.Count == 0) throw new MenuIsEmptyException("Ошибка: в меню нет пунктов");
 
                 string choice = "0";
                 while (!cancellationToken.IsCancellationRequested && 
                     !choice.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0].ToLower().Equals(CurrentSettings.ExitWord.ToLower()))
                 {
-                    if (cancellationToken.IsCancellationRequested) throw new Exception(CurrentSettings.ClosingPhrase);
+                    if (cancellationToken.IsCancellationRequested) throw new CancellationException("Ошибка: завершение работы меню");
                     Console.Clear();
                     for (int i = 0; i < points.Count; i++)
                     {
@@ -131,14 +131,29 @@ namespace ConsoleMenu
                     }
                     else if (num > points.Count)
                     {
-                        Console.WriteLine($"{CurrentSettings.ErrorPhrase} пункта с подобным номером не существует. Введите число от 1 до {points.Count}");
+                        Console.WriteLine($"Пункта с подобным номером не существует. Введите число от 1 до {points.Count}");
                         Console.ReadKey();
                     }
                 }
             }
+            catch (MenuIsEmptyException mex)
+            {
+                Console.WriteLine(mex.Message);
+                Console.ReadKey();
+            }
+            catch (CancellationException cex)
+            {
+                Console.WriteLine(cex.Message);
+                Console.ReadKey();
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.ReadKey();
+            }
+            finally
+            {
+                Console.WriteLine(CurrentSettings.ClosingPhrase);
                 Console.ReadKey();
             }
         }
@@ -146,13 +161,11 @@ namespace ConsoleMenu
         {
             try
             {
-                if (points.Count == 0) throw new Exception(CurrentSettings.ErrorPhrase + "в меню нет пунктов");
+                if (points.Count == 0) throw new MenuIsEmptyException("Ошибка: в меню нет пунктов");
 
                 Console.CursorVisible = false;
                 Console.ForegroundColor = CurrentSettings.RestingColor;
-                Console.WriteLine(CurrentSettings.OpeningPhrase + " с помощью клавиш " +
-                    "<Стрелка вверх> и <Стрелка вниз> " +
-                    "и нажмите клавишу <Enter> для перехода к пункту");
+                Console.WriteLine(CurrentSettings.OpeningPhrase);
                 Console.ForegroundColor = CurrentSettings.HighlightColor;
                 Console.WriteLine($"1 {points[0].Name}");
                 Console.ForegroundColor = CurrentSettings.RestingColor;
@@ -167,7 +180,7 @@ namespace ConsoleMenu
                 while(!cancellationToken.IsCancellationRequested && 
                     ck != CurrentSettings.ExitKey)
                 {
-                    if (cancellationToken.IsCancellationRequested) throw new Exception(CurrentSettings.ClosingPhrase);
+                    if (cancellationToken.IsCancellationRequested) throw new CancellationException("Ошибка: завершение работы меню");
                     ck = Console.ReadKey(true).Key;
                     if (ck == ConsoleKey.DownArrow && Cursor < points.Count - 1)
                     {
@@ -187,9 +200,8 @@ namespace ConsoleMenu
                         continue;
                     }
                     Console.Clear();
-                    Console.WriteLine(CurrentSettings.OpeningPhrase + " с помощью клавиш " +
-                        "<Стрелка вверх> и <Стрелка вниз> " +
-                        "и нажмите клавишу <Enter> для перехода к пункту");
+
+                    Console.WriteLine(CurrentSettings.OpeningPhrase);
                     for (int i = 0; i < points.Count; i++)
                     {
                         if (i == Cursor)
@@ -206,9 +218,24 @@ namespace ConsoleMenu
                 }
 
             }
+            catch (MenuIsEmptyException mex)
+            {
+                Console.WriteLine(mex.Message);
+                Console.ReadKey();
+            }
+            catch (CancellationException cex)
+            {
+                Console.WriteLine(cex.Message);
+                Console.ReadKey();
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.ReadKey();
+            }
+            finally
+            {
+                Console.WriteLine(CurrentSettings.ClosingPhrase);
                 Console.ReadKey();
             }
         }

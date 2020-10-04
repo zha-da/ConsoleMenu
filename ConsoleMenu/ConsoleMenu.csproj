@@ -42,7 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CancellationException.cs" />
     <Compile Include="CMenu.cs" />
+    <Compile Include="MenuIsEmptyException.cs" />
     <Compile Include="MenuPoint.cs" />
     <Compile Include="MenuSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
